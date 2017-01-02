@@ -1,10 +1,15 @@
+--[[--
+  The wavetable module is used to generate waveforms within a single buffer.
+
+  @Author:  Dave Smith-Hayes <me@davesmithhayes.com>
+--]]--
 local wavetable = {}
 
 local sample_rate = 44100
-local table_size = 1024
-local two_pi = 2 * math.pi
-local two_by_pi = 2 / math.pi
-local f_freq = 1 / (table_size / sample_rate)
+local table_size  = 1024
+local f_freq      = 1 / (table_size / sample_rate)
+local two_pi      = 2 * math.pi
+local two_by_pi   = 2 / math.pi
 
 --[[--
   @Return: number
@@ -19,6 +24,7 @@ end
     The new sample rate
 --]]--
 function wavetable.set_sample_rate(sr)
+  f_freq = wavetable.gen_f_freq(sr, table_size)
   sample_rate = sr
 end
 
@@ -35,7 +41,25 @@ end
     The new number of samples in the wavetable
 --]]--
 function wavetable.set_table_size(ts)
+  f_freq = wavetable.gen_f_freq(sample_rate, ts)
   table_size = ts
+end
+
+--[[--
+  @Parameter: number
+    The fundamental frequency to use
+--]]--
+function wavetable.set_f_freq(f)
+  table_size = wavetable.gen_table_size(sample_rate, f)
+  f_freq = f
+end
+
+--[[--
+  @Return: number
+    The fundamental frequency
+--]]--
+function wavetable.get_f_freq()
+  return f_freq
 end
 
 --[[--
@@ -98,9 +122,9 @@ function wavetable.gen_sin(f)
     ts = wavetable.gen_table_size(sample_rate, f)
   end
 
-  local freq = f or f_freq
-  local phase_inc = wavetable.gen_phase_inc(sample_rate, freq)
-  local phase = 0
+  local freq       = f or f_freq
+  local phase_inc  = wavetable.gen_phase_inc(sample_rate, freq)
+  local phase      = 0
   local wave_table = {}
 
   for i = 1, ts do
@@ -130,11 +154,11 @@ function wavetable.gen_sqr(f, dc)
     ts = wavetable.gen_table_size(sample_rate, f)
   end
 
-  local freq = f or f_freq
-  local duty = dc or 50
-  local mid_point = two_pi * (duty / 100)
-  local phase_inc = wavetable.gen_phase_inc(sample_rate, freq)
-  local phase = 0
+  local freq       = f or f_freq
+  local duty       = dc or 50
+  local mid_point  = two_pi * (duty / 100)
+  local phase_inc  = wavetable.gen_phase_inc(sample_rate, freq)
+  local phase      = 0
   local wave_table = {}
 
   for i = 1, ts do
@@ -166,9 +190,9 @@ function wavetable.gen_saw(f)
     ts = wavetable.gen_table_size(sample_rate, f)
   end
 
-  local freq = f or f_freq
-  local saw_inc = wavetable.gen_saw_inc(sample_rate, freq)
-  local saw_val = -1
+  local freq       = f or f_freq
+  local saw_inc    = wavetable.gen_saw_inc(sample_rate, freq)
+  local saw_val    = -1
   local wave_table = {}
 
   for i = 1, ts do
@@ -195,10 +219,10 @@ function wavetable.gen_tri(f)
     ts = wavetable.gen_table_size(sample_rate, f)
   end
 
-  local freq = f or f_freq
+  local freq       = f or f_freq
   local wave_table = {}
-  local phase_inc = wavetable.gen_phase_inc(sample_rate, freq)
-  local phase = 0
+  local phase_inc  = wavetable.gen_phase_inc(sample_rate, freq)
+  local phase      = 0
 
   for i = 1, ts do
     local tri_val = phase * two_by_pi
