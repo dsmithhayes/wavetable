@@ -6,7 +6,9 @@
   @Parameter: number
     The size of the wave table, defaults to 1024
 --]]--
-local function wavetable(init_sr, init_ts)
+local wavetable = {}
+
+function wavetable.init(init_sr, init_ts)
   local sample_rate = init_sr or 44100
   local table_size  = init_ts or 1024
   local f_freq      = 1 / (table_size / sample_rate)  -- fundamental frequency
