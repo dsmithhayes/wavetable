@@ -125,22 +125,35 @@ local function wavetable(init_sr, init_ts)
     @Parameter: number
       The frequency of the wavetable to generate, defaults to the calculated
       fundamental frequency stored locally
+    @Parameter: number
+      The duty cycle of the waveform
     @Return: table
       The generated wavetable
     --]]--
-  local function gen_sqr(f)
+  local function gen_sqr(f, dc)
     local ts = table_size
     if f then
       ts = gen_table_size(sample_rate, f)
     end
 
+    local freq = f or f_freq
+    local duty = dc or 50
+    local mid_point = two_pi * (duty / 100)
+    local phase_inc = gen_phase_inc(sample_rate, freq)
+    local phase = 0
     local wave_table = {}
 
     for i = 1, ts do
-      if i < (table_size / 2) then
-        wave_table[i] = 1
-      else
+      phase = phase + phase_inc
+
+      if phase >= two_pi then
+        phase = phase - two_pi
+      end
+
+      if phase >= mid_point then
         wave_table[i] = -1
+      else
+        wave_table[i] = 1
       end
     end
 
@@ -176,6 +189,12 @@ local function wavetable(init_sr, init_ts)
     return wave_table
   end
 
+  --[[--
+    @Parameter: number
+      The frequency to generate, defaults to the local f_freq
+    @Return: table
+      The generated wavetable
+  --]]--
   local function gen_tri(f)
     local ts = table_size
     if f then
