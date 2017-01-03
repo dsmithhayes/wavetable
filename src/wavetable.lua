@@ -168,22 +168,21 @@ end
 
 --[[--
   @Parameter: number
+    The duty cycle of the waveform as a number between 0 and 1
+  @Parameter: number
     The frequency of the wavetable to generate, defaults to the calculated
     fundamental frequency stored locally
-  @Parameter: number
-    The duty cycle of the waveform
   @Return: table
     The generated wavetable
 --]]--
-function wavetable:gen_sqr(f, dc)
+function wavetable:gen_pul(duty, f)
   local s = self.samples
   if f then
     s = wavetable:gen_samples(self.sample_rate, f)
   end
 
   local freq       = f or self.freq
-  local duty       = dc or 50
-  local mid_point  = TWO_PI * (duty / 100)
+  local mid_point  = TWO_PI * duty
   local phase_inc  = wavetable:gen_phase_inc(self.sample_rate, freq)
   local phase      = 0
   local wave_table = {}
@@ -203,6 +202,19 @@ function wavetable:gen_sqr(f, dc)
   end
 
   return wave_table
+end
+
+--[[--
+  This function is more or less an alias for the pulse generator with a fixed
+  50% duty cycle.
+
+  @Parameter: number
+    The frequency to generate
+  @Return: table
+    The generated square wave
+--]]--
+function wavetable:gen_sqr(f)
+  return self:gen_pul(0.5, f)
 end
 
 --[[--
